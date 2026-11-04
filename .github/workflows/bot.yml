@@ -1,0 +1,47 @@
+name: Discord bot
+
+on:
+  # Каждые 6 часов (00:05, 06:05, 12:05, 18:05 UTC) —	job и так живёт ~5ч55,
+  # потом короткий перезапуск, чтобы не упереться в 6-часовой лимит GitHub
+  schedule:
+    - cron: "5 */6 * * *"
+  # Ручной запуск из вкладки Actions
+  workflow_dispatch:
+
+# Очередь: параллельно бот не запускаем
+concurrency:
+  group: discord-bot
+  cancel-in-progress: false
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    # Лимит GitHub — 6 часов; оставляем запас на перезапуск
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Установка зависимостей
+        run: pip install -r requirements.txt
+
+      - name: Создание .env из секретов
+        env:
+          T: ${{ secrets.DISCORD_TOKEN }}
+          G: ${{ secrets.GUILD_ID }}
+          O: ${{ secrets.OWNER_ID }}
+          C: ${{ secrets.GHOST_CHANNEL_ID }}
+        run: |
+          {
+            echo "DISCORD_TOKEN=$T"
+            echo "GUILD_ID=$G"
+            echo "OWNER_ID=$O"
+            echo "GHOST_CHANNEL_ID=$C"
+          } > .env
+
+      - name: Запуск бота
+        run: python bot.py

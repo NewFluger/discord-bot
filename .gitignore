@@ -1,0 +1,10 @@
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+bot.log
+bot.err.log
+bot.pid.txt
+_deploy/
+discord-bot-discloud.zip
