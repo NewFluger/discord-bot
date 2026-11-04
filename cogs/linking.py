@@ -145,6 +145,7 @@ class Linking(commands.Cog):
 
         links[str(member.id)] = {
             "nick": nick,
+            "discord_nick": member.display_name,
             "uuid": uuid,
             "roles": [str(r.id) for r in member.roles if not r.is_default()],
             "at": discord.utils.utcnow().isoformat(),
@@ -303,18 +304,23 @@ class Linking(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member) -> None:
-        """Роли изменились у привязанного игрока → обновляем конфиг для плагина."""
-        if {r.id for r in before.roles} == {r.id for r in after.roles}:
+        """Роли/имя изменились у привязанного игрока → обновляем конфиг для плагина."""
+        roles_changed = {r.id for r in before.roles} != {r.id for r in after.roles}
+        name_changed = before.display_name != after.display_name
+        if not roles_changed and not name_changed:
             return
         links = self._links(after.guild.id)
         entry = links.get(str(after.id))
         if entry is None:
             return
-        entry["roles"] = [str(r.id) for r in after.roles if not r.is_default()]
+        if roles_changed:
+            entry["roles"] = [str(r.id) for r in after.roles if not r.is_default()]
+        if name_changed:
+            entry["discord_nick"] = after.display_name
         try:
             await self.bot.save_config()
         except Exception:
-            log.exception("Не удалось сохранить роли привязанного игрока")
+            log.exception("Не удалось обновить привязку игрока")
 
 
 async def setup(bot: commands.Bot) -> None:
