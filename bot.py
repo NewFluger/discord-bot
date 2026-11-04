@@ -42,6 +42,7 @@ EXTENSIONS = (
     "cogs.utility",
     "cogs.settings",
     "cogs.tickets",
+    "cogs.linking",
 )
 
 
@@ -73,6 +74,9 @@ class HelperBot(commands.Bot):
     def __init__(self) -> None:
         intents = discord.Intents.default()
         intents.members = True  # требует включённого Server Members Intent в портале
+        # Чтение текста/embeds сообщений (нужно для кодов привязки из канала-моста) —
+        # требует включённого Message Content Intent в портале
+        intents.message_content = True
         proxy_options = {"proxy": PROXY} if PROXY else {}
         super().__init__(
             command_prefix=commands.when_mentioned_or("!"),
