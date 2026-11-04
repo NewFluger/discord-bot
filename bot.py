@@ -6,6 +6,8 @@ from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 
+import storage
+
 load_dotenv()
 
 TOKEN = os.getenv("DISCORD_TOKEN", "").strip()
@@ -34,7 +36,13 @@ logging.basicConfig(
 )
 log = logging.getLogger("bot")
 
-EXTENSIONS = ("cogs.general", "cogs.moderation", "cogs.utility")
+EXTENSIONS = (
+    "cogs.general",
+    "cogs.moderation",
+    "cogs.utility",
+    "cogs.settings",
+    "cogs.tickets",
+)
 
 
 async def on_app_command_error(
@@ -72,6 +80,13 @@ class HelperBot(commands.Bot):
             help_command=None,
             **proxy_options,
         )
+        # Конфигурация (автороль, счётчики тикетов):
+        # локально — config.json, на Actions — коммит в репозиторий
+        self.config: dict = storage.load_local()
+
+    async def save_config(self) -> None:
+        """Сохраняет конфигурацию (в репозиторий на Actions или локальный файл)."""
+        await storage.save(self.config)
 
     async def setup_hook(self) -> None:
         self.tree.on_error = on_app_command_error
@@ -92,7 +107,7 @@ class HelperBot(commands.Bot):
             )
         else:
             synced = await self.tree.sync()
-            log.info("Глобальная синхронизация команд: %d (до ~1 часа)", len(synced))
+            log.info("Синхронизация команд: %d (до ~1 часа)", len(synced))
 
     async def on_ready(self) -> None:
         if self.user:

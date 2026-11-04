@@ -1,7 +1,7 @@
 name: Discord bot
 
 on:
-  # Каждые 6 часов (00:05, 06:05, 12:05, 18:05 UTC) —	job и так живёт ~5ч55,
+  # Каждые 6 часов (00:05, 06:05, 12:05, 18:05 UTC) — job и так живёт ~5ч55,
   # потом короткий перезапуск, чтобы не упереться в 6-часовой лимит GitHub
   schedule:
     - cron: "5 */6 * * *"
@@ -18,6 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     # Лимит GitHub — 6 часов; оставляем запас на перезапуск
     timeout-minutes: 355
+    # GITHUB_TOKEN с правом записи: бот коммитит config.json (своё хранилище)
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -44,4 +47,6 @@ jobs:
           } > .env
 
       - name: Запуск бота
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: python bot.py
