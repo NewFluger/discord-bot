@@ -168,12 +168,10 @@ class Linking(commands.Cog):
             title="✅ Привязка подтверждена",
             color=discord.Color.green(),
             timestamp=discord.utils.utcnow(),
-            fields=[
-                discord.EmbedField(name="Игрок", value=nick, inline=True),
-                discord.EmbedField(name="UUID", value=uuid or "—", inline=True),
-                discord.EmbedField(name="Discord", value=f"{member} ({member.id})", inline=False),
-            ],
         )
+        confirm.add_field(name="Игрок", value=nick, inline=True)
+        confirm.add_field(name="UUID", value=uuid or "—", inline=True)
+        confirm.add_field(name="Discord", value=f"{member} ({member.id})", inline=False)
         try:
             await bridge.send(embed=confirm)
         except discord.HTTPException:
@@ -227,11 +225,9 @@ class Linking(commands.Cog):
                 title="❌ Отвязка выполнена",
                 color=discord.Color.red(),
                 timestamp=discord.utils.utcnow(),
-                fields=[
-                    discord.EmbedField(name="Игрок", value=entry.get("nick", "—"), inline=True),
-                    discord.EmbedField(name="UUID", value=entry.get("uuid", "—"), inline=True),
-                ],
             )
+            embed.add_field(name="Игрок", value=entry.get("nick", "—"), inline=True)
+            embed.add_field(name="UUID", value=entry.get("uuid", "—"), inline=True)
             try:
                 await bridge.send(embed=embed)
             except discord.HTTPException:
@@ -290,10 +286,10 @@ class Linking(commands.Cog):
                 title="❌ Отвязка выполнена (запрос из игры)",
                 color=discord.Color.red(),
                 timestamp=discord.utils.utcnow(),
-                fields=[
-                    discord.EmbedField(name="Игрок", value=nick, inline=True),
-                    discord.EmbedField(name="UUID", value=fields.get("UUID", "—"), inline=True),
-                ],
+            )
+            confirm.add_field(name="Игрок", value=nick, inline=True)
+            confirm.add_field(
+                name="UUID", value=fields.get("UUID", "—"), inline=True
             )
             try:
                 await message.channel.send(embed=confirm)
